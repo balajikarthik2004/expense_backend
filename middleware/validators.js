@@ -17,7 +17,10 @@ const validate = (req, res, next) => {
 const registerValidator = [
   body("name").trim().notEmpty().withMessage("Name is required").isLength({ max: 50 }),
   body("email").isEmail().withMessage("Valid email is required").normalizeEmail(),
-  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+  body("password")
+    .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
+    .matches(/^(?=.*[A-Za-z])(?=.*\d).+$/)
+    .withMessage("Password must include at least one letter and one number"),
   validate,
 ];
 
