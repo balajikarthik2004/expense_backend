@@ -25,18 +25,26 @@ const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error("Not allowed by CORS"));
+    // No Origin header at all — native mobile apps (Expo Go, the built
+    // APK/IPA), curl and server-to-server calls. CORS is a browser mechanism
+    // and does not apply to them, so they are allowed through.
+    if (!origin) return callback(null, true);
+
+    // Reject by answering `false`, never by throwing. Throwing sends the error
+    // to the error handler, which returned a 500 — and, with NODE_ENV unset in
+    // production, a full stack trace exposing absolute server paths. Answering
+    // false simply omits the Access-Control-Allow-Origin header, which is what
+    // actually blocks the browser, and leaves the response clean.
+    return callback(null, allowedOrigins.includes(origin));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+// This also answers preflight OPTIONS requests; no separate app.options() route
+// is needed. (The previous `app.options("", ...)` matched no path and was dead.)
 app.use(cors(corsOptions));
-app.options("", cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
