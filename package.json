@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "backup": "node scripts/backup-to-cluster.js",
+    "backup:dry": "node scripts/backup-to-cluster.js --dry-run",
+    "backup:local": "node scripts/backup-db.js",
+    "snapshots": "node scripts/snapshots.js"
   },
   "keywords": [],
   "author": "",
